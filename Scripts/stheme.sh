@@ -9,7 +9,7 @@ YELLOW='\033[1;33m'
 
 DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-DIR_CUSTOM="/home/Starship"
+DIR_CUSTOM="${HOME}/Starship"
 
 case $SHELL in 
     */bash)  SHELL_CONFIG="${HOME}/.bashrc" ;;
@@ -21,11 +21,56 @@ esac
 
 # this is the section that handel custom themes
 set_theme_custom() {
- echo "i"
+  local NUM=$1
+  local CONFIG=${CONFIGS[$((NUM-1))]}
+  local LINE="eval \"\$(starship init ${SHELL##*/})\""
+  cp "$CONFIG" "$HOME/.config/starship.toml"
+  if [[ $SHELL_CONFIG == "NO" ]] ;then
+    exit
+  elif grep -q "$LINE" "$SHELL_CONFIG" ;then
+    exit
+  else 
+    echo -e "${RED}Starship isn't Setup Properly.${RESET}"
+    echo -e "${YELLOW}Please Add :" ; echo "${LINE}"
+    echo -e "To the end of ${SHELL_CONFIG} ${RESET}."
+    xdg-open $SHELL_CONFIG
+  fi
 }
 
 list_custom() {
-  mapfile -t WALLPAPERS < <(find "$DIR_CUSTOM" -maxdepth 1 -type f \( -name '*.toml' \))
+  if [[ -d $DIR_CUSTOM ]]; then
+    mkdir -p $DIR_CUSTOM
+
+  elif [ -z "$(ls -1 "${DIR_CUSTOM}"/*.{toml} 2>/dev/null)" ] ;then
+    echo -e "${RED} No configs have been found in ${DIR_CUSTOM}${RESET}"
+    echo -e "${YELLOW} Please copy your custom configs to the directory${RESET}"
+    exit
+  else
+    mkdir -p $DIR_CUSTOM
+    echo -e "${RED} A directory hav been created: ${DIR_CUSTOM}${RESET}"
+    echo -e "${YELLOW} Please copy your custom configs to the directory${RESET}"
+    exit
+  fi
+  mapfile -t CONFIGS < <(find "$DIR_CUSTOM" -type f \( -name '*.toml' \))
+
+  echo -e "${GREEN}Those are all the presets of starship"
+  echo "====================================="
+  CONFIG_BAK=$STARSHIP_CONFIG
+  for i in ${!CONFIGS[@]}; do
+    echo -e "${YELLOW}[${GREEN}$((i + 1))${YELLOW}]${RESET} ${CONFIGS[i]}"
+    export STARSHIP_CONFIG=${CONFIGS[i]}
+    starship prompt --path "${DIR}/preview" | sed -E 's/\\(\[|\]|x1b\[[0-9;]*m)//g'
+    echo ""
+  done
+  STARSHIP_CONFIG=$CONFIG_BAK
+  # Asks The User To Choose a Theme
+  echo "====================================="
+  echo -e "Please Choose a Theme ${YELLOW}[${GREEN}1-${#CONFIGS[@]}${YELLOW}]${GRAY}"
+  echo -e "${YELLOW}"
+  read -rp " >>> " CHOICE
+  echo -e "${GRAY}"
+
+  set_theme_custom $CHOICE
 }
 
 # This is the section that handels the presets
@@ -52,30 +97,30 @@ list_presets() {
   echo "====================================="
   
   mv ~/.config/starship.toml ~/.config/starship.toml.bak
-    for i in ${!PRESETS[@]}; do
-        echo -e "${YELLOW}[${GREEN}$((i+1))${YELLOW}]${GRAY} ${PRESETS[i]}:"
-        starship preset ${PRESETS[i]} -o ~/.config/starship.toml 
-        starship prompt --path "${DIR}/preview" | sed -E 's/\\(\[|\]|x1b\[[0-9;]*m)//g'
-        echo ""
-    done
-  mv mv ~/.config/starship.toml.bak ~/.config/starship.toml
-  
-    # Asks The User To Choose a Theme
-    echo "====================================="
-    echo -e "Please Choose a Theme ${YELLOW}[${GREEN}1-7${YELLOW}]${GRAY}"
-    echo -e "${YELLOW}"
-    read -rp " >>> " CHOICE
-    echo -e "${GRAY}"
+  for i in ${!PRESETS[@]}; do
+    echo -e "${YELLOW}[${GREEN}$((i+1))${YELLOW}]${GRAY} ${PRESETS[i]}:"
+    starship preset ${PRESETS[i]} -o ~/.config/starship.toml 
+    starship prompt --path "${DIR}/preview" | sed -E 's/\\(\[|\]|x1b\[[0-9;]*m)//g'
+    echo ""
+  done
+  mv ~/.config/starship.toml.bak ~/.config/starship.toml
 
-    # validate CHOICE
-    if ! [[ "$CHOICE" =~ ^[0-9]+$ && "$CHOICE" < 9 ]]; then
-      clear
-      echo -e "${RED}Please enter a valid number.${GRAY}"
-      list_presets
-      exit
-    else
-      set_theme_preset "$CHOICE"
-    fi
+  # Asks The User To Choose a Theme
+  echo "====================================="
+  echo -e "Please Choose a Theme ${YELLOW}[${GREEN}1-${#PRESETS[@]}${YELLOW}]${GRAY}"
+  echo -e "${YELLOW}"
+  read -rp " >>> " CHOICE
+  echo -e "${GRAY}"
+
+  # validate CHOICE
+  if ! [[ "$CHOICE" =~ ^[0-9]+$ && "$CHOICE" < 9 ]]; then
+    clear
+    echo -e "${RED}Please enter a valid number.${GRAY}"
+    list_presets
+    exit
+  else
+    set_theme_preset "$CHOICE"
+  fi
 }   
 
 if [[ $(which starship) ]];then

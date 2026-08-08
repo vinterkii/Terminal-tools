@@ -1,6 +1,10 @@
 #!/bin/bash
 # This Bash Script is a quick way to switch between starship prompt configurations
 
+# Backup Retry
+TRY=0
+RETRY_LIMIT=3
+
 # ANSI style codes
 BLACK='\033[0;30m'
 RED='\033[0;31m'
@@ -46,9 +50,19 @@ check() {
         exit ;;
   esac
 
+  # check defualt config
+  if [[ ! $STARSHIP_CONFIG ]]; then
+    if [[ -f "$HOME/.config/starship.toml" ]]; then
+      export STARSHIP_CONFIG="$HOME/.config/starship.toml"
+    else 
+      starship preset bracketed-segments -o "$HOME/.config/starship.toml"
+      export STARSHIP_CONFIG="$HOME/.config/starship.toml"
+    fi
+  fi
+
   # Check if starship prompt is enabled in $SHELL_CONFIG
   if grep -q "$LINE" "$SHELL_CONFIG" ; then
-    sleep 0
+    return 0
   else
     echo -e "${RED}Starship isn't Setup Properly.${RESET}"
     echo -e "${YELLOW}Please Add :" ; echo "${LINE}"
@@ -104,7 +118,7 @@ main() {
   case "$OPTION" in
     1|p*|P*) list_presets ;;
     2|c*|C*) list_custom ;;
-    3|b*|B*) backup_config ;;
+    3|b*|B*) backup_config "$HOME/Backup/Starship/" ;;
     *) exit 0 ;;
   esac
 }
@@ -113,7 +127,7 @@ main() {
 
 # The Directory Containing The Custom Configs (e.g. myconfig.toml)
 DIR_CUSTOM="${HOME}/.config/Starship"
-mapfile -t CONFIGS < <(find "$DIR_CUSTOM" -type f \( -name '*.toml' \))
+mapfile -t CONFIGS < <( [ -d "$DIR_CUSTOM" ] && find "$DIR_CUSTOM" -type f -name '*.toml' )
 
 # The function that lists and previews the availabel config files
 list_custom() {
@@ -122,7 +136,7 @@ list_custom() {
     echo -e "${RED} A directory hav been created: ${DIR_CUSTOM}${RESET}"
     echo -e "${YELLOW} Please copy your custom configs to the directory. ${RESET}"
     exit
-  elif [ -z "$(ls -1 "${DIR_CUSTOM}"/*.{toml} 2>/dev/null)" ] ;then
+  elif [ ${#CONFIGS[@]} == 0 ] ;then
     echo -e "${RED} No configs have been found in ${DIR_CUSTOM}${RESET}"
     echo -e "${YELLOW} Please copy your custom configs to the directory${RESET}"
     exit
@@ -159,8 +173,9 @@ list_custom() {
 set_theme_custom() {
   local NUM=$1
   local CONFIG=${CONFIGS[$((NUM-1))]}
+  
   if [[ -f "$CONFIG" ]]; then
-    backup_config "$HOME/Backup/Starship/Backup_Starship $(date '+%Y-%m-%d|%H:%M:%S').toml"
+    backup_config "$HOME/Backup/Starship/"
     cp "$CONFIG" "$HOME/.config/starship.toml"
   else
     echo -e "$RED Selected Option Not Found.$RESET"
@@ -200,16 +215,37 @@ print_help() {
   echo -e "       -h -help             | Print this message."
   echo -e "       -p -preset [number]  | apply one of the default presets."
   echo -e "       -c -custom [number]  | apply one of the custom configs in: $DIR_CUSTOM"
-  echo -e "       -b -backup [path]    | backup the current configuration."
+  echo -e "       -b -backup [folder]  | backup the current configuration."
   echo -e " PS: only one option can be specified at a time"
   exit 0
 }
 
 # backup current config
 backup_config() {
-  sleep 0
-  exit 0
+  local BACKUP_FOLDER="$1"
+  local BACKUP="Backup_Starship $(date '+%Y-%m-%d|%H:%M:%S').toml"
+  
+  mkdir -p "$BACKUP_FOLDER" || return 1
+
+  if [[ -f "$STARSHIP_CONFIG" ]]; then
+    cat "$STARSHIP_CONFIG" > "$BACKUP_FOLDER/$BACKUP" || return 1
+
+    if [[ -f "$BACKUP_FOLDER/$BACKUP" ]]; then
+      echo -e "$YELLOW Your Config have been backed-up to: $RESET"
+      echo -e "$GREEN $BACKUP_FOLDER/$BACKUP $RESET"
+      return 0
+    fi
+  fi
+
+  if [[ $TRY -lt $RETRY_LIMIT ]]; then
+    TRY=$((TRY + 1))
+    backup_config "$BACKUP_FOLDER"
+  else
+    echo -e "$RED Config backup failed $RESET"
+    return 1
+  fi
 }
+
 
 ARG1="$1"
 ARG2="$2"

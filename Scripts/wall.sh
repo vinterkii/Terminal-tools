@@ -8,7 +8,7 @@ YELLOW='\033[1;33m'
 RESET='\033[0m'
 
 # Change This Value to change the Wallpaper Directory
-DIR_WALLPAPERS="/live/persistence/TailsData_unlocked/dotfiles/Wallpapers"
+DIR_WALLPAPERS="$HOME/.config/Wallpapers"
 
 # The Final Function set the first passed file path as the desktop wallpaper
 set_wallpaper() {

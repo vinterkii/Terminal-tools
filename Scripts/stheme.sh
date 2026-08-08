@@ -118,7 +118,7 @@ main() {
   case "$OPTION" in
     1|p*|P*) list_presets ;;
     2|c*|C*) list_custom ;;
-    3|b*|B*) backup_config "$HOME/Backup/Starship/" ;;
+    3|b*|B*) backup_config ;;
     *) exit 0 ;;
   esac
 }
@@ -175,7 +175,7 @@ set_theme_custom() {
   local CONFIG=${CONFIGS[$((NUM-1))]}
   
   if [[ -f "$CONFIG" ]]; then
-    backup_config "$HOME/Backup/Starship/"
+    backup_config 
     cp "$CONFIG" "$HOME/.config/starship.toml"
   else
     clear
@@ -219,7 +219,7 @@ set_theme_preset() {
   local NUM=$1
   local PRESET=${PRESETS[$((NUM-1))]}
   if [[ ! "$PRESET" == "" ]]; then
-    backup_config "$HOME/Backup/Starship/"
+    backup_config
     starship preset ${PRESET} -o ~/.config/starship.toml
   else 
     clear
@@ -252,6 +252,10 @@ backup_config() {
   local BACKUP_FOLDER="$1"
   local BACKUP="Backup_Starship $(date '+%Y-%m-%d|%H:%M:%S').toml"
   
+  if [[ "$BACKUP_FOLDER" == "" ]]; then
+    BACKUP_FOLDER="$HOME/Backup/Starship"
+  fi
+
   mkdir -p "$BACKUP_FOLDER" || return 1
 
   if [[ -f "$STARSHIP_CONFIG" ]]; then

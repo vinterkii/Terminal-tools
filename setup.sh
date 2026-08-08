@@ -12,7 +12,7 @@ ITALIC='\x1B[3m'
 
 RESET='\033[0m\x1B[0m'
 
-# Geting the Tails-tools Directory
+# Geting the Terminal-tools Directory
 DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 # Get The Path to the used shell configuration
@@ -60,22 +60,26 @@ install() { #This function can't use indentation becuse Bash Scripting Sucks
 backup_config
 
 cat >> "$SHELL_CONFIG" <<EOF # Apends thee Following text to SHELL_CONFIG
-# Tails-tools setup MlVkT0a3
+# Terminal-tools setup MlVkT0a3
 wall() {
     bash ${DIR}/Scripts/wall.sh $1
 }
-# End Of Tails-tools (PS: Don't Add any thing inside it will be replaced when reinstalling)
+
+stheme() {
+    bash ${DIR}/Scripts/stheme.sh $1 $2
+}
+# End Of Terminal-tools (PS: Don't Add any thing inside it will be replaced when reinstalling)
 
 EOF
-echo -e "${GREEN}Done.${RESET} Tails-tools is now installed"
+echo -e "${GREEN}Done.${RESET} Terminal-tools is now installed"
 refresh
 return
 }
 
 # The remove function
 uninstall() {
-    local start_marker="# Tails-tools setup MlVkT0a3"
-    local end_marker="# End Of Tails-tools"
+    local start_marker="# Terminal-tools setup MlVkT0a3"
+    local end_marker="# End Of Terminal-tools"
     
     # Rechecks if setup.sh has run before
     if grep -qF "$start_marker" "$SHELL_CONFIG"; then
@@ -93,7 +97,7 @@ uninstall() {
             echo -e "${GREEN} Done.${RESET} Tails tools have been removed."
         fi
     else # This Probebly Wont be the case ever (Unless somthing changes while the script is running)
-        echo -e "${RED}Tails-tools isn't installed or have been messed with.${RESET}"
+        echo -e "${RED}Terminal-tools isn't installed or have been messed with.${RESET}"
         echo -e "Automatic removal is not available"
     fi
     refresh
@@ -107,7 +111,7 @@ update() {
             git pull origin main
         else
             git init
-            git remote set-url origin https://github.com/vinterkii/Tails-tools
+            git remote set-url origin https://github.com/vinterkii/Terminal-tools
             git pull origin main
         fi
         echo -e "${YELLOW}Please Run the setup agian and select 'reinstall'${RESET}"
@@ -119,11 +123,11 @@ update() {
 }
 
 reinstall() {
-    echo -e "${YELLOW}Tails-tools will be reinstalled soon..."
+    echo -e "${YELLOW}Terminal-tools will be reinstalled soon..."
     uninstall
     sleep .5
     install
-    echo -e "${GREEN}Done.${RESET} Tails-tools has been re installed"
+    echo -e "${GREEN}Done.${RESET} Terminal-tools has been re installed"
     refresh
     return
 }
@@ -141,7 +145,7 @@ refresh() {
 }
 
 # Check if the setup has run before
-if grep -q "# Tails-tools setup MlVkT0a3" $SHELL_CONFIG ; then
+if grep -q "# Terminal-tools setup MlVkT0a3" $SHELL_CONFIG ; then
     echo -e "The Script Has been Setup Before..."
     # Choices
     echo -e "What do you want to do:"
@@ -160,6 +164,7 @@ else
     read -rp "..." 
     echo -e "The script will add these aliases:"
     echo "${ORANGE}wall ${GRAY}# This is the Wallpaper Changer for Gnome"
+    echo "${ORANGE}stheme ${GRAY}# This is a Starship.rs Theme Switcher"
     # add more aliases as you add more scripts  
     
     read -p "Are You Sure You Want To Continue? (y/n):" ACTION

@@ -1,45 +1,63 @@
-# Tails-tools
+# Terminal-tools
 A collection of scripts and utilities that I use daily.
 
----
+## Tools
+Below is a list of all the tools available in this repo.
 
-# Tools
-Bellow is a list of all the tools available in this repo.
+### [wall.sh](https://github.com/vinterkii/Terminal-tools/blob/main/Scripts/wall.sh)
+A Bash wallpaper changer for GNOME. It scans a wallpaper folder by default: `~/.config/Wallpapers`. It lists supported image files (PNG/JPG/JPEG/GIF), prompts you to pick one, then sets it as both the desktop wallpaper and lock-screen wallpaper using `gsettings`.
 
-## [wall.sh](https://github.com/vinterkii/Tails-tools/blob/main/Scripts/wall.sh)
-A Bash wallpaper changer for Gnome. It scans a wallpaper folder By Default `/live/persistence/TailsData_unlocked/dotfiles/Wallpapers`, lists all supported image files (PNG/JPG/JPEG/GIF), and prompts you to pick one. Then the script sets the selected image as the desktop wallpaper and the lock-screen wallpaper via `gsettings`.
+After installation, you can use it by running:
+- `wall`
 
-after [Installation](https://github.com/vinterkii/Tails-tools#installation) you can use this tool by typing the `wall` command in the terminal. 
+### [stheme.sh](https://github.com/vinterkii/Terminal-tools/blob/main/Scripts/stheme.sh)
+A Bash Starship theme/config switcher. This utility has 3 modes—run `stheme` and choose one:
+- **Custom:** lists available configs in the theme directory (default: `~/.config/Starship`) and prompts you to choose one.
+- **Preset:** lists available presets and prompts you to choose one.
+- **Backup:** backs up your current Starship configuration (default: `~/Backup/Starship`).
 
+You can also set themes directly:
+- `-c` for custom themes (followed by the theme number)
+- `-p` for presets (followed by the theme number)
 
-# Installation
-## Automatic
-I have made an installation Script `setup.sh`.
+After installation, you can use it by running:
+- `stheme`
 
-Just clone the repository:
+For help, use:
+- `stheme -h` or `stheme -help`
+
+## Installation
+
+### Automatic
+1. Clone the repository:
 ```bash
-git clone https://github.com/vinterkii/Tails-tools.git
+git clone https://github.com/vinterkii/Terminal-tools.git
 ```
 
-cd into the `Tails-tools` repo:
+2. Go into the repo:
 ```bash
-cd Tails-tools
+cd Terminal-tools
 ```
 
-and run the `setup.sh` Script:
+3. Run the installer:
 ```bash
 bash setup.sh
 ```
 
-now all the tools are installed reopen your terminal and they will be ready to use
+Now reopen your terminal, and the tools will be ready to use.
 
-## Manual
-you can add aliases to your Shell config (e.g. `~/.bashrc` if you're using bash...)
+### Manual
+Add aliases to your shell config (e.g., `~/.bashrc` for Bash).
 
-like this
 ```bash
 alias wall='bash /path/to/script/wall.sh'
+alias stheme='bash /path/to/script/stheme.sh'
 ```
-then run `. 'your shell config'` e.g. `. ~/.bashrc` or `source ~/.bashrc` if using bash
 
-TailsOS: mind that if your shell config isn't persistent you'll need to install it every time you restart, if you don't want that enable dotfile in the persistent Storage and copy the shell config into it and restart
+Then reload your shell config:
+```bash
+. ~/.bashrc
+```
+(or `source ~/.bashrc`)
+
+**TailsOS:** if your shell config isn’t persistent, you’ll need to set the aliases every time you restart. If you want it to persist, enable dotfile persistence in the persistent storage, copy the shell config there, and restart.

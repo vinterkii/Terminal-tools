@@ -61,13 +61,9 @@ backup_config
 
 cat >> "$SHELL_CONFIG" <<EOF # Apends thee Following text to SHELL_CONFIG
 # Terminal-tools setup MlVkT0a3
-wall() {
-    bash ${DIR}/Scripts/wall.sh $1
-}
+alias wall='bash ${DIR}/Scripts/wall.sh'
 
-stheme() {
-    bash ${DIR}/Scripts/stheme.sh $1 $2
-}
+alias stheme='bash ${DIR}/Scripts/stheme.sh'
 # End Of Terminal-tools (PS: Don't Add any thing inside it will be replaced when reinstalling)
 
 EOF
@@ -84,17 +80,17 @@ uninstall() {
     # Rechecks if setup.sh has run before
     if grep -qF "$start_marker" "$SHELL_CONFIG"; then
         backup_config
-        CONDITION=$()
+            
         if readlink $SHELL_CONFIG ;then
             local SHELL_CONFIG_TAILSOS
             SHELL_CONFIG_TAILSOS=$(readlink $SHELL_CONFIG)
             # remove every line that lies between the start_marker and end_marker
             sed -i "/$start_marker/,/$end_marker/d" "$SHELL_CONFIG_TAILSOS"
-            echo -e "${GREEN} Done.${RESET} Tails tools have been removed."
+            echo -e "${GREEN}Done.${RESET} Tails tools have been removed."
         else
             # remove every line that lies between the start_marker and end_marker
             sed -i "/$start_marker/,/$end_marker/d" "$SHELL_CONFIG"
-            echo -e "${GREEN} Done.${RESET} Tails tools have been removed."
+            echo -e "${GREEN}Done.${RESET} Tails tools have been removed."
         fi
     else # This Probebly Wont be the case ever (Unless somthing changes while the script is running)
         echo -e "${RED}Terminal-tools isn't installed or have been messed with.${RESET}"

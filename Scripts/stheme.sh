@@ -172,6 +172,12 @@ list_custom() {
 # the function that sets the chosen config
 set_theme_custom() {
   local NUM=$1
+
+  if [[ "$NUM" == "" ]]; then
+    list_custom
+    return
+  fi
+
   local CONFIG=${CONFIGS[$((NUM-1))]}
   
   if [[ -f "$CONFIG" ]]; then
@@ -200,7 +206,7 @@ list_presets() {
   mv ~/.config/starship.toml ~/.config/starship.toml.bak
   for i in ${!PRESETS[@]}; do
     echo -e "${YELLOW}[${GREEN}$((i+1))${YELLOW}]${GRAY} ${PRESETS[i]}:"
-    starship preset ${PRESETS[i]} -o ~/.config/starship.toml 
+    starship preset ${PRESETS[i]} -o ~/.config/starship.toml  
     starship prompt --path "${DIR}/preview" | sed -E 's/\\(\[|\]|x1b\[[0-9;]*m)//g'
     echo ""
   done
@@ -217,10 +223,16 @@ list_presets() {
 # the function that sets the chosen preset
 set_theme_preset() {
   local NUM=$1
+
+  if [[ "$NUM" == "" ]]; then
+    list_presets
+    return
+  fi
+
   local PRESET=${PRESETS[$((NUM-1))]}
   if [[ ! "$PRESET" == "" ]]; then
     backup_config
-    starship preset ${PRESET} -o ~/.config/starship.toml
+    starship preset ${PRESET} -o ~/.config/starship.toml 
   else 
     clear
     echo -e "$RED Please Choose an option from the list $RESET"
